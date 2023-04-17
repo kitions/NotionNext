@@ -18,11 +18,11 @@ const BlogPostCard = ({ post, showSummary }) => {
         key={post.id}
         className="flex flex-col-reverse justify-between duration-300"
       >
-        <div className="lg:p-8 p-4 flex flex-col w-full">
+        <div className=" p-4 flex flex-col w-full">
           <Link
             href={`${BLOG.SUB_PATH}/${post.slug}`}
             passHref
-            className={`cursor-pointer hover:underline text-3xl ${showPreview ? 'text-center' : ''
+            className={`cursor-pointer hover:underline text-2xl ${showPreview ? 'text-center' : ''
               } leading-tight text-gray-700 dark:text-gray-100 hover:text-blue-500 dark:hover:text-blue-400`}>
 
             <NotionIcon icon={post.pageIcon} /> {post.title}
@@ -68,7 +68,7 @@ const BlogPostCard = ({ post, showSummary }) => {
           </div>
 
           {(!showPreview || showSummary) && !post.results && (
-            <p className="mt-4 mb-24 text-gray-700 dark:text-gray-300 text-sm font-light leading-7">
+            <p className="mt-4 mb-24 text-gray-700 dark:text-gray-300 text-sm font-light leading-7" style={{ margin: 0, marginTop: 8 }}>
               {post.summary}
             </p>
           )}
@@ -88,7 +88,7 @@ const BlogPostCard = ({ post, showSummary }) => {
             </div>
           )}
 
-          <div className="text-right border-t pt-8 border-dashed">
+          {/* <div className="text-right border-t pt-8 border-dashed">
             <Link
               href={`${BLOG.SUB_PATH}/${post.slug}`}
               className="hover:bg-opacity-100 hover:underline transform duration-300 p-3 text-white bg-gray-800 cursor-pointer">
@@ -97,7 +97,7 @@ const BlogPostCard = ({ post, showSummary }) => {
               <i className="ml-1 fas fa-angle-right" />
 
             </Link>
-          </div>
+          </div> */}
         </div>
 
         {CONFIG_NEXT.POST_LIST_COVER && post?.page_cover && (
