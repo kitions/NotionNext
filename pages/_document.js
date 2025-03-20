@@ -31,6 +31,8 @@ class MyDocument extends Document {
                 <body className={`${BLOG.FONT_STYLE} font-light scroll-smooth`}>
                     <Main />
                     <NextScript />
+                    {/* Cloudflare Web Analytics */}
+                    <script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "953fd2463f3e4eff8209d3ba19f70791"}'></script>
                 </body>
             </Html>
     )
