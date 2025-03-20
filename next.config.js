@@ -131,15 +131,8 @@ const nextConfig = {
       'source.unsplash.com',
       'p1.qhimg.com',
       'webmention.io',
-      'ko-fi.com'
-    ],
-    // 图片加载器优化
-    loader: 'default',
-    // 图片缓存优化
-    minimumCacheTTL: 60 * 60 * 24 * 7, // 7天
-    // 危险的允许SVG
-    dangerouslyAllowSVG: true,
-    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;"
+      'myqcloud.com'
+    ]
   },
 
   // 默认将feed重定向至 /public/rss/feed.xml
