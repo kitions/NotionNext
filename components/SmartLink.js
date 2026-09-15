@@ -66,7 +66,9 @@ const SmartLink = ({ href, children, ...rest }) => {
     if (Object.keys(preservedQuery).length === 0) return value
 
     const isAbsolute = value.startsWith('http://') || value.startsWith('https://')
-    const url = new URL(value, LINK)
+    // 查询参数只会在浏览器端读取；相对链接应以当前站点为基准。
+    // LINK 默认允许为空，直接将它传给 URL 会抛出 "Invalid base URL"。
+    const url = new URL(value, window.location.origin)
     Object.entries(preservedQuery).forEach(([key, paramValue]) => {
       if (!url.searchParams.has(key)) {
         url.searchParams.set(key, paramValue)
