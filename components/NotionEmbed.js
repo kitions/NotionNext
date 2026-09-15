@@ -63,6 +63,39 @@ const HTML_ARTIFACT_RESIZE_BRIDGE = `<script data-notion-next-auto-height>
     frameId = window.requestAnimationFrame(measure)
   }
 
+  const findAnchorTarget = hash => {
+    if (hash === '#') return document.documentElement
+
+    let targetName = hash.slice(1)
+    try {
+      targetName = decodeURIComponent(targetName)
+    } catch {}
+
+    if (!targetName) return document.documentElement
+    return (
+      document.getElementById(targetName) ||
+      document.getElementsByName(targetName)[0] ||
+      null
+    )
+  }
+
+  document.addEventListener('click', event => {
+    const link =
+      event.target instanceof Element
+        ? event.target.closest('a[href]')
+        : null
+    const href = link?.getAttribute('href')
+    if (!href?.startsWith('#')) return
+
+    const target = findAnchorTarget(href)
+    if (!target) return
+
+    // A relative fragment in srcDoc resolves against the embedding page URL.
+    // Handle it locally so the sandbox does not try to navigate the article.
+    event.preventDefault()
+    target.scrollIntoView({ block: 'start' })
+  })
+
   window.addEventListener('message', event => {
     if (event.source !== window.parent) return
     if (event.data?.type !== measureMessageType) return

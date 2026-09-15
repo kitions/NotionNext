@@ -60,6 +60,10 @@ describe('NotionEmbed HTML artifact auto height', () => {
     expect(srcDoc).toContain('data-notion-next-auto-height')
     expect(srcDoc).toContain(HTML_ARTIFACT_RESIZE_MESSAGE)
     expect(srcDoc).toContain(HTML_ARTIFACT_MEASURE_MESSAGE)
+    expect(srcDoc).toContain("event.target.closest('a[href]')")
+    expect(srcDoc).toContain("href?.startsWith('#')")
+    expect(srcDoc).toContain('event.preventDefault()')
+    expect(srcDoc).toContain("target.scrollIntoView({ block: 'start' })")
 
     dispatchFrameMessage(frame, {
       type: HTML_ARTIFACT_RESIZE_MESSAGE,
