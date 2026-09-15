@@ -99,18 +99,19 @@ describe('NotionEmbed HTML artifact auto height', () => {
   it('falls back to an in-page fullscreen view and exits with Escape', () => {
     render(<NotionEmbed block={createHtmlArtifactBlock()} />)
 
-    const frame = screen.getByTitle('Notion HTML block')
-    const wrapper = frame.parentElement
-
     fireEvent.click(screen.getByRole('button', { name: '全屏查看' }))
 
-    expect(wrapper).toHaveClass('notion-html-artifact-frame-expanded')
+    const expandedWrapper = screen.getByTitle('Notion HTML block').parentElement
+    expect(expandedWrapper).toHaveClass('notion-html-artifact-frame-expanded')
+    expect(expandedWrapper.parentElement).toBe(document.body)
     expect(screen.getByRole('button', { name: '退出全屏' })).toBeInTheDocument()
     expect(document.body).toHaveStyle('overflow: hidden')
 
     fireEvent.keyDown(document, { key: 'Escape' })
 
-    expect(wrapper).not.toHaveClass('notion-html-artifact-frame-expanded')
+    const inlineWrapper = screen.getByTitle('Notion HTML block').parentElement
+    expect(inlineWrapper).not.toHaveClass('notion-html-artifact-frame-expanded')
+    expect(inlineWrapper.parentElement).not.toBe(document.body)
     expect(document.body.style.overflow).toBe('')
   })
 
@@ -144,13 +145,16 @@ describe('NotionEmbed HTML artifact auto height', () => {
 
     render(<NotionEmbed block={createHtmlArtifactBlock()} />)
 
-    const wrapper = screen.getByTitle('Notion HTML block').parentElement
-    expect(wrapper).toHaveClass('notion-html-artifact-frame-expanded')
+    const expandedWrapper = screen.getByTitle('Notion HTML block').parentElement
+    expect(expandedWrapper).toHaveClass('notion-html-artifact-frame-expanded')
+    expect(expandedWrapper.parentElement).toBe(document.body)
 
     fireEvent.click(screen.getByRole('button', { name: '退出全屏' }))
 
     const url = new URL(window.location.href)
-    expect(wrapper).not.toHaveClass('notion-html-artifact-frame-expanded')
+    const inlineWrapper = screen.getByTitle('Notion HTML block').parentElement
+    expect(inlineWrapper).not.toHaveClass('notion-html-artifact-frame-expanded')
+    expect(inlineWrapper.parentElement).not.toBe(document.body)
     expect(url.searchParams.get('theme')).toBe('fuwari')
     expect(url.searchParams.has(HTML_ARTIFACT_QUERY_PARAM)).toBe(false)
   })

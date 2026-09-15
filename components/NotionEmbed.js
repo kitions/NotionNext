@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useNotionContext } from 'react-notion-x'
 
 export const HTML_ARTIFACT_RESIZE_MESSAGE = 'notion-next:html-artifact-resize'
@@ -301,68 +302,72 @@ const NotionEmbed = ({ block }) => {
     window.open(url.toString(), '_blank', 'noopener,noreferrer')
   }
 
-  return (
-    <figure className='notion-asset-wrapper notion-asset-wrapper-embed'>
-      <div
-        ref={frameContainerRef}
-        className={
-          isHtmlArtifact
-            ? `notion-html-artifact-frame${
-                isFallbackFullscreen
-                  ? ' notion-html-artifact-frame-expanded'
-                  : ''
-              }`
-            : undefined
+  const frameElement = (
+    <div
+      ref={frameContainerRef}
+      className={
+        isHtmlArtifact
+          ? `notion-html-artifact-frame${
+              isFallbackFullscreen
+                ? ' notion-html-artifact-frame-expanded'
+                : ''
+            }`
+          : undefined
+      }
+      style={{ height, position: 'relative' }}>
+      <iframe
+        ref={iframeRef}
+        className='notion-asset-object-fit'
+        src={resizableSrcDoc ? undefined : source}
+        srcDoc={resizableSrcDoc}
+        title={title}
+        frameBorder='0'
+        loading='lazy'
+        scrolling='auto'
+        onLoad={requestHtmlArtifactHeight}
+        allowFullScreen={!isHtmlArtifact}
+        sandbox={
+          isHtmlArtifact ? 'allow-scripts allow-forms allow-popups' : undefined
         }
-        style={{ height, position: 'relative' }}>
-        <iframe
-          ref={iframeRef}
-          className='notion-asset-object-fit'
-          src={resizableSrcDoc ? undefined : source}
-          srcDoc={resizableSrcDoc}
-          title={title}
-          frameBorder='0'
-          loading='lazy'
-          scrolling='auto'
-          onLoad={requestHtmlArtifactHeight}
-          allowFullScreen={!isHtmlArtifact}
-          sandbox={
-            isHtmlArtifact
-              ? 'allow-scripts allow-forms allow-popups'
-              : undefined
-          }
-        />
-        {isHtmlArtifact && (
-          <div className='notion-html-artifact-controls'>
-            {!isFullscreen && (
-              <button
-                type='button'
-                className='notion-html-artifact-control-button'
-                onClick={openHtmlArtifactInNewTab}
-                aria-label='在新标签页打开'
-                title='在新标签页打开'>
-                <i
-                  className='fa-solid fa-up-right-from-square'
-                  aria-hidden='true'
-                />
-              </button>
-            )}
+      />
+      {isHtmlArtifact && (
+        <div className='notion-html-artifact-controls'>
+          {!isFullscreen && (
             <button
               type='button'
               className='notion-html-artifact-control-button'
-              onClick={toggleHtmlArtifactFullscreen}
-              aria-label={isFullscreen ? '退出全屏' : '全屏查看'}
-              title={isFullscreen ? '退出全屏' : '全屏查看'}>
+              onClick={openHtmlArtifactInNewTab}
+              aria-label='在新标签页打开'
+              title='在新标签页打开'>
               <i
-                className={`fa-solid ${
-                  isFullscreen ? 'fa-compress' : 'fa-expand'
-                }`}
+                className='fa-solid fa-up-right-from-square'
                 aria-hidden='true'
               />
             </button>
-          </div>
-        )}
-      </div>
+          )}
+          <button
+            type='button'
+            className='notion-html-artifact-control-button'
+            onClick={toggleHtmlArtifactFullscreen}
+            aria-label={isFullscreen ? '退出全屏' : '全屏查看'}
+            title={isFullscreen ? '退出全屏' : '全屏查看'}>
+            <i
+              className={`fa-solid ${
+                isFullscreen ? 'fa-compress' : 'fa-expand'
+              }`}
+              aria-hidden='true'
+            />
+          </button>
+        </div>
+      )}
+    </div>
+  )
+
+  return (
+    <figure className='notion-asset-wrapper notion-asset-wrapper-embed'>
+      {isFallbackFullscreen
+        ? createPortal(frameElement, document.body)
+        : frameElement}
     </figure>
   )
 }
