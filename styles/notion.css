@@ -797,11 +797,16 @@ svg.notion-page-icon {
   z-index: 2147483647;
 }
 
-.notion-html-artifact-fullscreen-button {
+.notion-html-artifact-controls {
   position: absolute;
   top: 0.5rem;
   right: 0.5rem;
   z-index: 2;
+  display: flex;
+  gap: 0.375rem;
+}
+
+.notion-html-artifact-control-button {
   display: inline-flex;
   width: 2.25rem;
   height: 2.25rem;
@@ -819,13 +824,13 @@ svg.notion-page-icon {
     background-color 150ms ease;
 }
 
-.notion-html-artifact-fullscreen-button:hover,
-.notion-html-artifact-fullscreen-button:focus-visible {
+.notion-html-artifact-control-button:hover,
+.notion-html-artifact-control-button:focus-visible {
   opacity: 1;
   background: rgb(17 24 39 / 92%);
 }
 
-.notion-html-artifact-fullscreen-button:focus-visible {
+.notion-html-artifact-control-button:focus-visible {
   outline: 2px solid white;
   outline-offset: 2px;
 }

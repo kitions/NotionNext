@@ -5,6 +5,15 @@ export const HTML_ARTIFACT_RESIZE_MESSAGE = 'notion-next:html-artifact-resize'
 export const HTML_ARTIFACT_MEASURE_MESSAGE = 'notion-next:html-artifact-measure'
 export const HTML_ARTIFACT_MIN_HEIGHT = 32
 export const HTML_ARTIFACT_MAX_HEIGHT = 4096
+export const HTML_ARTIFACT_QUERY_PARAM = 'htmlBlock'
+
+const clearHtmlArtifactQuery = blockId => {
+  const url = new URL(window.location.href)
+  if (url.searchParams.get(HTML_ARTIFACT_QUERY_PARAM) !== blockId) return
+
+  url.searchParams.delete(HTML_ARTIFACT_QUERY_PARAM)
+  window.history.replaceState(window.history.state, '', url.toString())
+}
 
 const HTML_ARTIFACT_RESIZE_BRIDGE = `<script data-notion-next-auto-height>
 (() => {
@@ -163,6 +172,15 @@ const NotionEmbed = ({ block }) => {
   }, [block?.id, configuredHeight])
 
   useEffect(() => {
+    if (!isHtmlArtifact || !block?.id) return
+
+    const requestedBlockId = new URLSearchParams(window.location.search).get(
+      HTML_ARTIFACT_QUERY_PARAM
+    )
+    if (requestedBlockId === block.id) setIsFallbackFullscreen(true)
+  }, [block?.id, isHtmlArtifact])
+
+  useEffect(() => {
     if (!isHtmlArtifact) return
 
     const handleFullscreenChange = () => {
@@ -188,7 +206,9 @@ const NotionEmbed = ({ block }) => {
 
     const previousOverflow = document.body.style.overflow
     const handleKeyDown = event => {
-      if (event.key === 'Escape') setIsFallbackFullscreen(false)
+      if (event.key !== 'Escape') return
+      setIsFallbackFullscreen(false)
+      clearHtmlArtifactQuery(block?.id)
     }
 
     document.body.style.overflow = 'hidden'
@@ -198,7 +218,7 @@ const NotionEmbed = ({ block }) => {
       document.body.style.overflow = previousOverflow
       document.removeEventListener('keydown', handleKeyDown)
     }
-  }, [isFallbackFullscreen])
+  }, [block?.id, isFallbackFullscreen])
 
   // block.id is intentionally excluded: the handler reads the current iframe
   // ref at message time, and onLoad remeasures whenever its document changes.
@@ -245,6 +265,7 @@ const NotionEmbed = ({ block }) => {
 
     if (isFallbackFullscreen) {
       setIsFallbackFullscreen(false)
+      clearHtmlArtifactQuery(block?.id)
       return
     }
 
@@ -270,6 +291,14 @@ const NotionEmbed = ({ block }) => {
     } catch {
       setIsFallbackFullscreen(true)
     }
+  }
+
+  const openHtmlArtifactInNewTab = () => {
+    if (!block?.id) return
+
+    const url = new URL(window.location.href)
+    url.searchParams.set(HTML_ARTIFACT_QUERY_PARAM, block.id)
+    window.open(url.toString(), '_blank', 'noopener,noreferrer')
   }
 
   return (
@@ -304,19 +333,34 @@ const NotionEmbed = ({ block }) => {
           }
         />
         {isHtmlArtifact && (
-          <button
-            type='button'
-            className='notion-html-artifact-fullscreen-button'
-            onClick={toggleHtmlArtifactFullscreen}
-            aria-label={isFullscreen ? '退出全屏' : '全屏查看'}
-            title={isFullscreen ? '退出全屏' : '全屏查看'}>
-            <i
-              className={`fa-solid ${
-                isFullscreen ? 'fa-compress' : 'fa-expand'
-              }`}
-              aria-hidden='true'
-            />
-          </button>
+          <div className='notion-html-artifact-controls'>
+            {!isFullscreen && (
+              <button
+                type='button'
+                className='notion-html-artifact-control-button'
+                onClick={openHtmlArtifactInNewTab}
+                aria-label='在新标签页打开'
+                title='在新标签页打开'>
+                <i
+                  className='fa-solid fa-up-right-from-square'
+                  aria-hidden='true'
+                />
+              </button>
+            )}
+            <button
+              type='button'
+              className='notion-html-artifact-control-button'
+              onClick={toggleHtmlArtifactFullscreen}
+              aria-label={isFullscreen ? '退出全屏' : '全屏查看'}
+              title={isFullscreen ? '退出全屏' : '全屏查看'}>
+              <i
+                className={`fa-solid ${
+                  isFullscreen ? 'fa-compress' : 'fa-expand'
+                }`}
+                aria-hidden='true'
+              />
+            </button>
+          </div>
         )}
       </div>
     </figure>

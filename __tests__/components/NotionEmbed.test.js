@@ -5,6 +5,7 @@ import NotionEmbed, {
   HTML_ARTIFACT_MAX_HEIGHT,
   HTML_ARTIFACT_MEASURE_MESSAGE,
   HTML_ARTIFACT_MIN_HEIGHT,
+  HTML_ARTIFACT_QUERY_PARAM,
   HTML_ARTIFACT_RESIZE_MESSAGE,
   normalizeHtmlArtifactHeight,
   withHtmlArtifactResizeBridge
@@ -40,6 +41,7 @@ const dispatchFrameMessage = (frame, data, source = frame.contentWindow) => {
 describe('NotionEmbed HTML artifact auto height', () => {
   beforeEach(() => {
     useNotionContext.mockReturnValue({ recordMap: { signed_urls: {} } })
+    window.history.replaceState({}, '', '/')
   })
 
   it('injects the resize bridge and applies reported content height', () => {
@@ -112,6 +114,47 @@ describe('NotionEmbed HTML artifact auto height', () => {
     expect(document.body.style.overflow).toBe('')
   })
 
+  it('opens a sandboxed full-page view in a new tab', () => {
+    window.history.replaceState({}, '', '/article/example?theme=fuwari#details')
+    const open = jest.spyOn(window, 'open').mockImplementation(() => null)
+
+    render(<NotionEmbed block={createHtmlArtifactBlock()} />)
+    fireEvent.click(
+      screen.getByRole('button', { name: '在新标签页打开' })
+    )
+
+    const [targetUrl, target, features] = open.mock.calls[0]
+    const url = new URL(targetUrl)
+    expect(url.pathname).toBe('/article/example')
+    expect(url.searchParams.get('theme')).toBe('fuwari')
+    expect(url.searchParams.get(HTML_ARTIFACT_QUERY_PARAM)).toBe(
+      'html-artifact-1'
+    )
+    expect(url.hash).toBe('#details')
+    expect(target).toBe('_blank')
+    expect(features).toBe('noopener,noreferrer')
+  })
+
+  it('expands a linked HTML artifact and removes the query on exit', () => {
+    window.history.replaceState(
+      {},
+      '',
+      `/?theme=fuwari&${HTML_ARTIFACT_QUERY_PARAM}=html-artifact-1`
+    )
+
+    render(<NotionEmbed block={createHtmlArtifactBlock()} />)
+
+    const wrapper = screen.getByTitle('Notion HTML block').parentElement
+    expect(wrapper).toHaveClass('notion-html-artifact-frame-expanded')
+
+    fireEvent.click(screen.getByRole('button', { name: '退出全屏' }))
+
+    const url = new URL(window.location.href)
+    expect(wrapper).not.toHaveClass('notion-html-artifact-frame-expanded')
+    expect(url.searchParams.get('theme')).toBe('fuwari')
+    expect(url.searchParams.has(HTML_ARTIFACT_QUERY_PARAM)).toBe(false)
+  })
+
   it('ignores resize messages from other windows or with the wrong type', () => {
     render(<NotionEmbed block={createHtmlArtifactBlock()} />)
 
@@ -150,6 +193,9 @@ describe('NotionEmbed HTML artifact auto height', () => {
     expect(frame.parentElement).toHaveStyle('height: 300px')
     expect(
       screen.queryByRole('button', { name: '全屏查看' })
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: '在新标签页打开' })
     ).not.toBeInTheDocument()
   })
 })
