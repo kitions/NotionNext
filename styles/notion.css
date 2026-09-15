@@ -782,6 +782,54 @@ svg.notion-page-icon {
   background: rgb(247, 246, 245);
 }
 
+.notion-html-artifact-frame:fullscreen,
+.notion-html-artifact-frame:-webkit-full-screen,
+.notion-html-artifact-frame-expanded {
+  width: 100vw !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  background: rgb(247, 246, 245);
+}
+
+.notion-html-artifact-frame-expanded {
+  position: fixed !important;
+  inset: 0;
+  z-index: 2147483647;
+}
+
+.notion-html-artifact-fullscreen-button {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  z-index: 2;
+  display: inline-flex;
+  width: 2.25rem;
+  height: 2.25rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgb(255 255 255 / 25%);
+  border-radius: 0.5rem;
+  color: white;
+  background: rgb(17 24 39 / 78%);
+  box-shadow: 0 2px 8px rgb(0 0 0 / 20%);
+  cursor: pointer;
+  opacity: 0.82;
+  transition:
+    opacity 150ms ease,
+    background-color 150ms ease;
+}
+
+.notion-html-artifact-fullscreen-button:hover,
+.notion-html-artifact-fullscreen-button:focus-visible {
+  opacity: 1;
+  background: rgb(17 24 39 / 92%);
+}
+
+.notion-html-artifact-fullscreen-button:focus-visible {
+  outline: 2px solid white;
+  outline-offset: 2px;
+}
+
 .notion-text {
   width: 100%;
   white-space: pre-wrap;

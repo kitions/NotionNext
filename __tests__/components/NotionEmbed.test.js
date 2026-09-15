@@ -81,6 +81,37 @@ describe('NotionEmbed HTML artifact auto height', () => {
     )
   })
 
+  it('opens the HTML artifact with the native fullscreen API', () => {
+    render(<NotionEmbed block={createHtmlArtifactBlock()} />)
+
+    const frame = screen.getByTitle('Notion HTML block')
+    const wrapper = frame.parentElement
+    const requestFullscreen = jest.fn().mockResolvedValue(undefined)
+    wrapper.requestFullscreen = requestFullscreen
+
+    fireEvent.click(screen.getByRole('button', { name: '全屏查看' }))
+
+    expect(requestFullscreen).toHaveBeenCalledTimes(1)
+  })
+
+  it('falls back to an in-page fullscreen view and exits with Escape', () => {
+    render(<NotionEmbed block={createHtmlArtifactBlock()} />)
+
+    const frame = screen.getByTitle('Notion HTML block')
+    const wrapper = frame.parentElement
+
+    fireEvent.click(screen.getByRole('button', { name: '全屏查看' }))
+
+    expect(wrapper).toHaveClass('notion-html-artifact-frame-expanded')
+    expect(screen.getByRole('button', { name: '退出全屏' })).toBeInTheDocument()
+    expect(document.body).toHaveStyle('overflow: hidden')
+
+    fireEvent.keyDown(document, { key: 'Escape' })
+
+    expect(wrapper).not.toHaveClass('notion-html-artifact-frame-expanded')
+    expect(document.body.style.overflow).toBe('')
+  })
+
   it('ignores resize messages from other windows or with the wrong type', () => {
     render(<NotionEmbed block={createHtmlArtifactBlock()} />)
 
@@ -117,6 +148,9 @@ describe('NotionEmbed HTML artifact auto height', () => {
     expect(frame).not.toHaveAttribute('srcdoc')
     expect(frame).not.toHaveAttribute('sandbox')
     expect(frame.parentElement).toHaveStyle('height: 300px')
+    expect(
+      screen.queryByRole('button', { name: '全屏查看' })
+    ).not.toBeInTheDocument()
   })
 })
 

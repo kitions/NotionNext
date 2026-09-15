@@ -133,6 +133,7 @@ const getConfiguredHeight = (block, isHtmlArtifact) => {
 const NotionEmbed = ({ block }) => {
   const { recordMap } = useNotionContext()
   const iframeRef = useRef(null)
+  const frameContainerRef = useRef(null)
   const source =
     recordMap?.signed_urls?.[block?.id] ||
     block?.format?.display_source ||
@@ -144,6 +145,9 @@ const NotionEmbed = ({ block }) => {
     : undefined
   const configuredHeight = getConfiguredHeight(block, isHtmlArtifact)
   const [height, setHeight] = useState(configuredHeight)
+  const [isNativeFullscreen, setIsNativeFullscreen] = useState(false)
+  const [isFallbackFullscreen, setIsFallbackFullscreen] = useState(false)
+  const isFullscreen = isNativeFullscreen || isFallbackFullscreen
 
   const requestHtmlArtifactHeight = () => {
     if (!isHtmlArtifact) return
@@ -155,7 +159,46 @@ const NotionEmbed = ({ block }) => {
 
   useEffect(() => {
     setHeight(configuredHeight)
+    setIsFallbackFullscreen(false)
   }, [block?.id, configuredHeight])
+
+  useEffect(() => {
+    if (!isHtmlArtifact) return
+
+    const handleFullscreenChange = () => {
+      const fullscreenElement =
+        document.fullscreenElement || document.webkitFullscreenElement
+      setIsNativeFullscreen(fullscreenElement === frameContainerRef.current)
+    }
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange)
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange)
+
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange)
+      document.removeEventListener(
+        'webkitfullscreenchange',
+        handleFullscreenChange
+      )
+    }
+  }, [isHtmlArtifact])
+
+  useEffect(() => {
+    if (!isFallbackFullscreen) return
+
+    const previousOverflow = document.body.style.overflow
+    const handleKeyDown = event => {
+      if (event.key === 'Escape') setIsFallbackFullscreen(false)
+    }
+
+    document.body.style.overflow = 'hidden'
+    document.addEventListener('keydown', handleKeyDown)
+
+    return () => {
+      document.body.style.overflow = previousOverflow
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [isFallbackFullscreen])
 
   // block.id is intentionally excluded: the handler reads the current iframe
   // ref at message time, and onLoad remeasures whenever its document changes.
@@ -196,9 +239,53 @@ const NotionEmbed = ({ block }) => {
     ? withHtmlArtifactResizeBridge(srcDoc)
     : undefined
 
+  const toggleHtmlArtifactFullscreen = () => {
+    const container = frameContainerRef.current
+    if (!container) return
+
+    if (isFallbackFullscreen) {
+      setIsFallbackFullscreen(false)
+      return
+    }
+
+    const fullscreenElement =
+      document.fullscreenElement || document.webkitFullscreenElement
+    if (fullscreenElement === container) {
+      const exitFullscreen =
+        document.exitFullscreen || document.webkitExitFullscreen
+      exitFullscreen?.call(document)
+      return
+    }
+
+    const requestFullscreen =
+      container.requestFullscreen || container.webkitRequestFullscreen
+    if (!requestFullscreen) {
+      setIsFallbackFullscreen(true)
+      return
+    }
+
+    try {
+      const result = requestFullscreen.call(container)
+      result?.catch?.(() => setIsFallbackFullscreen(true))
+    } catch {
+      setIsFallbackFullscreen(true)
+    }
+  }
+
   return (
     <figure className='notion-asset-wrapper notion-asset-wrapper-embed'>
-      <div style={{ height, position: 'relative' }}>
+      <div
+        ref={frameContainerRef}
+        className={
+          isHtmlArtifact
+            ? `notion-html-artifact-frame${
+                isFallbackFullscreen
+                  ? ' notion-html-artifact-frame-expanded'
+                  : ''
+              }`
+            : undefined
+        }
+        style={{ height, position: 'relative' }}>
         <iframe
           ref={iframeRef}
           className='notion-asset-object-fit'
@@ -216,6 +303,21 @@ const NotionEmbed = ({ block }) => {
               : undefined
           }
         />
+        {isHtmlArtifact && (
+          <button
+            type='button'
+            className='notion-html-artifact-fullscreen-button'
+            onClick={toggleHtmlArtifactFullscreen}
+            aria-label={isFullscreen ? '退出全屏' : '全屏查看'}
+            title={isFullscreen ? '退出全屏' : '全屏查看'}>
+            <i
+              className={`fa-solid ${
+                isFullscreen ? 'fa-compress' : 'fa-expand'
+              }`}
+              aria-hidden='true'
+            />
+          </button>
+        )}
       </div>
     </figure>
   )
