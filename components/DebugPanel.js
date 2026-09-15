@@ -1,4 +1,3 @@
-import useHydrated from '@/hooks/useHydrated'
 import { siteConfigMap } from '@/lib/config'
 import { useGlobal } from '@/lib/global'
 import { getQueryParam } from '@/lib/utils'
@@ -15,9 +14,7 @@ const DebugPanel = () => {
   const [show, setShow] = useState(false)
   const { theme, switchTheme, locale } = useGlobal()
   const router = useRouter()
-  const isHydrated = useHydrated()
-  const currentTheme =
-    (isHydrated && getQueryParam(router.asPath, 'theme')) || theme
+  const currentTheme = getQueryParam(router.asPath, 'theme') || theme
   const [siteConfig, updateSiteConfig] = useState({})
 
   // 主题下拉框

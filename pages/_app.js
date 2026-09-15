@@ -7,7 +7,6 @@ import 'react-notion-x/src/styles.css' // 原版的react-notion-x
 import '@/styles/notion.css' //  重写部分notion样式
 
 import useAdjustStyle from '@/hooks/useAdjustStyle'
-import useHydrated from '@/hooks/useHydrated'
 import { GlobalContextProvider } from '@/lib/global'
 import { getBaseLayoutByTheme } from '@/themes/theme'
 import { useRouter } from 'next/router'
@@ -41,13 +40,9 @@ const AppErrorBoundary = ErrorHandler.createErrorBoundary(
 const MyApp = ({ Component, pageProps }) => {
   // 一些可能出现 bug 的样式，可以统一放入该钩子进行调整
   useAdjustStyle()
-  const isHydrated = useHydrated()
 
   const route = useRouter()
-  // 静态页面水合完成后再读取查询参数，避免服务端与客户端首屏主题不同。
-  const queryTheme = isHydrated
-    ? getQueryParam(route.asPath, 'theme')
-    : null
+  const queryTheme = getQueryParam(route.asPath, 'theme')
   const notionTheme = pageProps?.NOTION_CONFIG?.THEME
   const configTheme = BLOG.THEME
   const theme = useMemo(() => {

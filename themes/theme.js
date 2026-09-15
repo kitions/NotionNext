@@ -1,5 +1,4 @@
 import BLOG, { LAYOUT_MAPPINGS } from '@/blog.config'
-import useHydrated from '@/hooks/useHydrated'
 import getConfig from 'next/config'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/router'
@@ -178,9 +177,7 @@ export const getThemeConfig = async themeQuery => {
  * 获取当前主题（query 主题优先，且做合法性校验）
  */
 const getCurrentTheme = (router, fallbackTheme) => {
-  const queryTheme = router?.isReady
-    ? getQueryParam(router?.asPath, 'theme')
-    : null
+  const queryTheme = getQueryParam(router?.asPath, 'theme')
   if (queryTheme) {
     return normalizeThemeName(queryTheme)
   }
@@ -224,8 +221,7 @@ export const DynamicLayout = props => {
  */
 export const useLayoutByTheme = ({ layoutName, theme }) => {
   const router = useRouter()
-  const isHydrated = useHydrated()
-  const themeQuery = getCurrentTheme(isHydrated ? router : null, theme)
+  const themeQuery = getCurrentTheme(router, theme)
   const cacheKey = `${themeQuery}:${layoutName}`
 
   if (layoutByThemeCache.has(cacheKey)) {
