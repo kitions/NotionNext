@@ -1,6 +1,6 @@
 import Link from 'next/link'
-import { useRouter } from 'next/router'
 import { siteConfig } from '@/lib/config'
+import useHydrated from '@/hooks/useHydrated'
 
 // 过滤 <a> 标签不能识别的 props
 const filterDOMProps = props => {
@@ -34,7 +34,7 @@ const filterLinkProps = props => {
 
 const SmartLink = ({ href, children, ...rest }) => {
   const LINK = siteConfig('LINK')
-  const router = useRouter()
+  const isHydrated = useHydrated()
 
   // 获取 URL 字符串用于判断是否是外链
   let urlString = ''
@@ -53,7 +53,7 @@ const SmartLink = ({ href, children, ...rest }) => {
 
   const getPersistedQuery = () => {
     // 静态页面水合完成前，服务端与客户端必须输出相同的 href。
-    if (typeof window === 'undefined' || !router.isReady) return {}
+    if (!isHydrated) return {}
     const queryString = window.location.search?.slice(1) || ''
     const params = new URLSearchParams(queryString)
     const preserved = {}

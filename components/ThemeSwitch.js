@@ -1,4 +1,5 @@
 import { getThemeSwitchMeta } from '@/conf/themeSwitch.manifest'
+import useHydrated from '@/hooks/useHydrated'
 import { siteConfig } from '@/lib/config'
 import { useGlobal } from '@/lib/global'
 import { getQueryParam } from '@/lib/utils'
@@ -571,8 +572,9 @@ function ThemeConsole ({ meta, onClose }) {
 const ThemeSwitch = () => {
   const { theme, locale, isDarkMode, toggleDarkMode } = useGlobal()
   const router = useRouter()
+  const isHydrated = useHydrated()
   const currentTheme =
-    (router.isReady && getQueryParam(router.asPath, 'theme')) || theme
+    (isHydrated && getQueryParam(router.asPath, 'theme')) || theme
   const [sideBarVisible, setSideBarVisible] = useState(false)
   const [consoleVisible, setConsoleVisible] = useState(false)
 

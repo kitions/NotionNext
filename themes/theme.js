@@ -1,4 +1,5 @@
 import BLOG, { LAYOUT_MAPPINGS } from '@/blog.config'
+import useHydrated from '@/hooks/useHydrated'
 import getConfig from 'next/config'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/router'
@@ -223,7 +224,8 @@ export const DynamicLayout = props => {
  */
 export const useLayoutByTheme = ({ layoutName, theme }) => {
   const router = useRouter()
-  const themeQuery = getCurrentTheme(router, theme)
+  const isHydrated = useHydrated()
+  const themeQuery = getCurrentTheme(isHydrated ? router : null, theme)
   const cacheKey = `${themeQuery}:${layoutName}`
 
   if (layoutByThemeCache.has(cacheKey)) {
