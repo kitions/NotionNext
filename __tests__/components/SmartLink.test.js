@@ -7,6 +7,10 @@ jest.mock('next/link', () => ({ href, children, ...props }) => (
   </a>
 ))
 
+jest.mock('next/router', () => ({
+  useRouter: jest.fn(() => ({ isReady: true }))
+}))
+
 jest.mock('@/lib/config', () => ({
   siteConfig: jest.fn(() => '')
 }))

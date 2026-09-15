@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { useRouter } from 'next/router'
 import { siteConfig } from '@/lib/config'
 
 // 过滤 <a> 标签不能识别的 props
@@ -33,6 +34,7 @@ const filterLinkProps = props => {
 
 const SmartLink = ({ href, children, ...rest }) => {
   const LINK = siteConfig('LINK')
+  const router = useRouter()
 
   // 获取 URL 字符串用于判断是否是外链
   let urlString = ''
@@ -50,7 +52,8 @@ const SmartLink = ({ href, children, ...rest }) => {
   const isExternal = urlString.startsWith('http') && !urlString.startsWith(LINK)
 
   const getPersistedQuery = () => {
-    if (typeof window === 'undefined') return {}
+    // 静态页面水合完成前，服务端与客户端必须输出相同的 href。
+    if (typeof window === 'undefined' || !router.isReady) return {}
     const queryString = window.location.search?.slice(1) || ''
     const params = new URLSearchParams(queryString)
     const preserved = {}

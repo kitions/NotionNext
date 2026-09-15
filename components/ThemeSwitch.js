@@ -571,7 +571,8 @@ function ThemeConsole ({ meta, onClose }) {
 const ThemeSwitch = () => {
   const { theme, locale, isDarkMode, toggleDarkMode } = useGlobal()
   const router = useRouter()
-  const currentTheme = getQueryParam(router.asPath, 'theme') || theme
+  const currentTheme =
+    (router.isReady && getQueryParam(router.asPath, 'theme')) || theme
   const [sideBarVisible, setSideBarVisible] = useState(false)
   const [consoleVisible, setConsoleVisible] = useState(false)
 

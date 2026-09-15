@@ -14,7 +14,8 @@ const DebugPanel = () => {
   const [show, setShow] = useState(false)
   const { theme, switchTheme, locale } = useGlobal()
   const router = useRouter()
-  const currentTheme = getQueryParam(router.asPath, 'theme') || theme
+  const currentTheme =
+    (router.isReady && getQueryParam(router.asPath, 'theme')) || theme
   const [siteConfig, updateSiteConfig] = useState({})
 
   // 主题下拉框

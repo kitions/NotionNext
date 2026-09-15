@@ -42,7 +42,10 @@ const MyApp = ({ Component, pageProps }) => {
   useAdjustStyle()
 
   const route = useRouter()
-  const queryTheme = getQueryParam(route.asPath, 'theme')
+  // 静态页面水合完成后再读取查询参数，避免服务端与客户端首屏主题不同。
+  const queryTheme = route.isReady
+    ? getQueryParam(route.asPath, 'theme')
+    : null
   const notionTheme = pageProps?.NOTION_CONFIG?.THEME
   const configTheme = BLOG.THEME
   const theme = useMemo(() => {
